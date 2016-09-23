@@ -10,6 +10,19 @@
 % for details. 
 function [sol, fval, exitflag, output] = NelderMead(funfcn, x0, options, varargin)
 
+    % Please report bugs and inquiries to:
+    %
+    % Name       : Rody P.S. Oldenhuis
+    % E-mail     : oldenhuis@gmail.com    (personal)
+    %              oldenhuis@luxspace.lu  (professional)
+    % Affiliation: LuxSpace s�rl
+    % Licence    : BSD
+
+
+    % If you find this work useful, please consider a donation:
+    % https://www.paypal.me/RodyO/3.5
+
+
     % Check inputs
     error(nargchk(2,inf,nargin,'struct'))
     if ~isa(funfcn, 'function_handle')
