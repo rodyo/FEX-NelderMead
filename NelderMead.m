@@ -7,17 +7,14 @@
 % Volume 1 Issue 2, Pages 524 - 534,
 % "Efficient Implementation of the Nelder-Mead Search Algorithm"
 %
-% for details. 
+% for details.
 function [sol, fval, exitflag, output] = NelderMead(funfcn, x0, options, varargin)
 
     % Please report bugs and inquiries to:
     %
-    % Name       : Rody P.S. Oldenhuis
-    % E-mail     : oldenhuis@gmail.com    (personal)
-    %              oldenhuis@luxspace.lu  (professional)
-    % Affiliation: LuxSpace s�rl
-    % Licence    : BSD
-
+    % Name    : Rody P.S. Oldenhuis
+    % E-mail  : oldenhuis@gmail.com
+    % Licence : 2-clause BSD (See License.txt)
 
     % If you find this work useful, please consider a donation:
     % https://www.paypal.me/RodyO/3.5
@@ -27,19 +24,19 @@ function [sol, fval, exitflag, output] = NelderMead(funfcn, x0, options, varargi
     error(nargchk(2,inf,nargin,'struct'))
     if ~isa(funfcn, 'function_handle')
         error('NelderMead:invalid_function',...
-            'Input argument FUNFCN must be a valid function handle.');        
+            'Input argument FUNFCN must be a valid function handle.');
     end
-        
+
     if (nargin == 2) || isempty(options)
         options = optimset; end
-       
-    
+
+
     % Nelder-Mead algorithm control factors
     alpha = 1;     beta  = 0.5;
     gamma = 2;     delta = 0.5;
     a     = 1/20; % (a) is the size of the initial simplex.
     % 1/20 is 5% of the initial values.
-           
+
     % constants
     N                         = numel(x0);
     originalSize              = size(x0);
@@ -48,15 +45,15 @@ function [sol, fval, exitflag, output] = NelderMead(funfcn, x0, options, varargi
     VSfactor_expand           = (alpha*gamma)^(1/N);
     VSfactor_inside_contract  = beta^(1/N);
     VSfactor_outside_contract = (alpha*beta)^(1/N);
-    VSfactor_shrink           = delta;    
-        
+    VSfactor_shrink           = delta;
+
     % Parse options
     reltol_x = optimget(options, 'TolX'  , 1e-4);
     reltol_f = optimget(options, 'TolFun', 1e-4);
     max_evaluations = optimget(options, 'MaxFunEvals', 200*N);
     max_iterations  = optimget(options, 'MaxIter', 1e4);
     display = optimget(options, 'display', 'off');
-    
+
     % Check for output functions
     have_Outputfcn = false;
     if ~isempty(options.OutputFcn)
@@ -69,17 +66,17 @@ function [sol, fval, exitflag, output] = NelderMead(funfcn, x0, options, varargi
     operation    = 0;    op = 'initial simplex';
     volume_ratio = 1;
     stop = false;
-    
+
     % Generate initial simplex
     p = a/N/sqrt(2) * (sqrt(N+1) + N - 1) *  eye(N);
     q = a/N/sqrt(2) * (sqrt(N+1) - 1)     * ~eye(N);
-    x = x0(:, ones(1,N));    
+    x = x0(:, ones(1,N));
     x = [x0, x + p + q];
-   
+
     % function is known to be ``vectorized''
-    f = funfcn(reshape(x, originalSize));   
+    f = funfcn(reshape(x, originalSize));
     evaluations = N+1;
-    
+
     % first evaluate output function
     if have_Outputfcn
         optimValues.iteration = iterations;
@@ -91,7 +88,7 @@ function [sol, fval, exitflag, output] = NelderMead(funfcn, x0, options, varargi
 
     % sort and re-label initial simplex
     [f, inds] = sort(f);  x = x(:, inds);
-    
+
     % compute initial centroid
     C = sum(x(:, 1:end-1), 2)/N;
 
@@ -123,7 +120,7 @@ function [sol, fval, exitflag, output] = NelderMead(funfcn, x0, options, varargi
             fprintf(1, '\t\t%4.0d', evaluations);
             fprintf(1, '\t\t%s\n', op);
         end
-        
+
         % re-sort function values
         x_replaced = x(:, end);
         if operation == 2  % shrink steps
@@ -133,7 +130,7 @@ function [sol, fval, exitflag, output] = NelderMead(funfcn, x0, options, varargi
             f = [f(sort_inds(~inds)), f(end), f(sort_inds(inds))];
             x = [x(:, sort_inds(~inds)), x_replaced, x(:, sort_inds(inds))];
         end
-        
+
         % update centroid (Singer & Singer are wrong here...
         % shrink & non-shrink steps should be treated the same)
         C = C + (x_replaced -  x(:, end))/N;
@@ -212,7 +209,7 @@ function [sol, fval, exitflag, output] = NelderMead(funfcn, x0, options, varargi
                 continue;
 
             % everything else has failed - shrink the simplex towards x1
-            else                
+            else
                 % first shrink
                 operation = 2;
                 xones = x(:, ones(1, N+1));
@@ -221,10 +218,10 @@ function [sol, fval, exitflag, output] = NelderMead(funfcn, x0, options, varargi
                 evaluations = evaluations + N + 1;
                 volume_ratio = VSfactor_shrink * volume_ratio;
                 % then evaluate output function
-                op = 'shrink';                
+                op = 'shrink';
             end
-            
-        end % select next procedure        
+
+        end % select next procedure
     end % main loop
 
     % evaluate output function
@@ -273,7 +270,7 @@ function [sol, fval, exitflag, output] = NelderMead(funfcn, x0, options, varargi
                 sprintf('All function values are non-finite. Exiting...\n');
     end
 
-    % display convergence 
+    % display convergence
     if ~isempty(options.Display) && ~strcmpi(options.Display, 'off')
         fprintf(1, '\n%s\n', output.message); end
 
